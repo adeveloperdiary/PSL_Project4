@@ -1,0 +1,242 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Word Cloud</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+
+    <script src="lib/jquery-3.3.1.slim.min.js" ></script>
+    <script src="lib/d3/d3.js" charset="utf-8"></script>
+    <script src="lib/d3/d3.layout.cloud.js"></script>
+    <script src="d3.wordcloud.js"></script>
+    <script src="lib/popper.min.js" ></script>
+    <script src="lib/bootstrap.min.js"></script>
+
+
+    <script src="d3.wordcloud.js"></script>
+    <script src="d3.wordcloud.js"></script>
+
+    <script src="lib/highcharts.js"></script>
+
+    <style>
+
+
+    </style>
+
+
+  </head>
+  <body style="text-align: center">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: #e3f2fd;border:1px solid rgba(0,0,0,.125)">
+    <a class="navbar-brand" href="#">PSL - Project 4 - Sentiment Analysis </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+    </div>
+  </nav>
+
+  <div style="width: 100%;height: 20px">
+
+  </div>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col">
+        <div class="card text-center">
+          <div class="card-header " style="font-weight: bold">
+            Positive Sentiment Words in Vocab
+          </div>
+          <div class="card-body">
+            <div id='wordcloud_pos'>Loading, Please wait ...</div>
+          </div>
+          <div class="card-footer text-muted">
+            <div style="float: left"> Total Words: 1127</div>
+            <div style="float: right"> <button type="button" class="btn btn-sm btn-primary" onclick="loadPosWordCloud()">Refresh</button></div>
+          </div>
+        </div>
+        </div>
+      <div class="col">
+        <div class="card text-center">
+          <div class="card-header" style="font-weight: bold">
+            Negative Sentiment Words in Vocab
+          </div>
+          <div class="card-body">
+            <div id='wordcloud_neg'>Loading, Please wait ...</div>
+          </div>
+          <div class="card-footer text-muted">
+            <div style="float: left"> Total Words: 1873</div>
+            <div style="float: right"> <button type="button" class="btn btn-sm btn-primary" onclick="loadNegWordCloud()">Refresh</button></div>
+          </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top:30px;" >
+      <div class="col">
+        <div class="card text-center" id="chart_body" style="display: none">
+
+          <div class="card-body" >
+            <div id="container" style="margin: 0 auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+
+
+    <script>
+
+      var pos_words=[];
+      var neg_words=[];
+      var width=0;
+
+      function showPosCloud(){
+        d3.wordcloud('#wordcloud_pos')
+                .size([width, 500])
+                .fill(d3.scale.ordinal().range(["#1f7a1f","#33cc33","#70db70"]))
+                .words(pos_words)
+                .onwordclick(function(d, i) {
+                  //console.log(parseInt(d.pos),d.neg);
+
+                  $('#chart_body').css('display','');
+
+                  chart.setTitle({text: "Word  \""+d.text +"\" present in reviews"});
+
+
+                  chart.series[0].update({
+                    data: [parseInt(d.neg)]
+                  }, false);
+
+                  chart.series[1].update({
+                    data: [parseInt(d.pos)]
+                  }, true);
+
+
+                })
+                .start();
+      }
+
+
+      function loadPosWordCloud(loaded){
+
+        if(loaded){
+          showPosCloud();
+        }else{
+          d3.csv("pos_list.csv", function(rows) {
+            pos_words=rows;
+            $('#wordcloud_pos').html('');
+            showPosCloud();
+
+          });
+        }
+
+
+
+      }
+
+      function showNegCloud(){
+        d3.wordcloud('#wordcloud_neg')
+                .size([width, 500])
+                .fill(d3.scale.ordinal().range(["#800000", "#ff0000", "#ff8080"]))
+                .words(neg_words)
+                .onwordclick(function (d, i) {
+
+                  $('#chart_body').css('display','');
+
+                  chart.setTitle({text: "Word  \""+d.text +"\" present in reviews"});
+
+                  chart.series[0].update({
+                    data: [parseInt(d.neg)]
+                  }, false);
+
+                  chart.series[1].update({
+                    data: [parseInt(d.pos)]
+                  }, true);
+                })
+                .start();
+      }
+
+      function loadNegWordCloud(loaded){
+
+        if(loaded){
+          showNegCloud();
+        }else {
+
+          d3.csv("neg_list.csv", function (rows) {
+            neg_words = rows;
+            $('#wordcloud_neg').html('');
+
+            showNegCloud();
+
+            $('#chart_body').css('display','');
+            chart.series[0].update({
+              data: [parseInt(331)]
+            }, false);
+
+            chart.series[1].update({
+              data: [parseInt(1234)]
+            }, true);
+
+          });
+        }
+      }
+
+
+      $( document ).ready(function() {
+        width=$( document ).width()/2-100;
+        loadPosWordCloud();
+        loadNegWordCloud();
+      });
+
+
+
+    </script>
+
+      <script>
+
+        Highcharts.setOptions({
+          colors: ['#ff0000', '#50B432']
+        });
+
+        var chart = Highcharts.chart('container', {
+          chart: {
+            type: 'bar',
+            height: 150
+          },
+          title: {
+            text:"Word  \"excellent\" present in reviews"
+          },
+          xAxis: {
+            categories: ['Sentiments']
+          },
+          yAxis: {
+            min: 0,
+
+          },
+          legend: {
+            reversed: true
+          },
+          plotOptions: {
+            series: {
+              stacking: 'normal'
+            }
+          },
+          series: [{
+            name: 'Negative',
+            data: [0]
+          }, {
+            name: 'Positive',
+            data: [0]
+          }]
+        });
+
+      </script>
+
+
+  </body>
+</html>
+
